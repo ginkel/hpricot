@@ -16,8 +16,8 @@ BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
                'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile',
                '**/.*.sw?', '*.gem', '.config', 'pkg']
-RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
-PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
+RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README.md', '--inline-source']
+PKG_FILES = %w(CHANGELOG COPYING README.md Rakefile) +
       Dir.glob("{bin,doc,test,lib,extras}/**/*") +
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") +
       %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
@@ -39,7 +39,7 @@ SPEC =
     s.platform = Gem::Platform::RUBY
     s.has_rdoc = true
     s.rdoc_options += RDOC_OPTS
-    s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
+    s.extra_rdoc_files = ["README.md", "CHANGELOG", "COPYING"]
     s.summary = "a swift, liberal HTML parser with a fantastic library"
     s.description = s.summary
     s.author = "why the lucky stiff"
@@ -83,8 +83,8 @@ end
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
     rdoc.options += RDOC_OPTS
-    rdoc.main = "README"
-    rdoc.rdoc_files.add ['README', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
+    rdoc.main = "README.md"
+    rdoc.rdoc_files.add ['README.md', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|
