@@ -9,7 +9,7 @@ class TestAlter < Test::Unit::TestCase
   def setup
     @basic = Hpricot.parse(TestFiles::BASIC)
   end
-  
+
   def test_before
     test0 = "<link rel='stylesheet' href='test0.css' />"
     @basic.at("link").before(test0)
@@ -27,14 +27,38 @@ class TestAlter < Test::Unit::TestCase
     assert_equal 'wrapper', ohmy[0].parent['id']
     assert_equal 'ohmy', Hpricot(@basic.to_html).at("#wrapper").children[0]['class']
   end
-  
+
   def test_add_class
     first_p = (@basic/"p:first").add_class("testing123")
     assert first_p[0].get_attribute("class").split(" ").include?("testing123")
     assert (Hpricot(@basic.to_html)/"p:first")[0].attributes["class"].split(" ").include?("testing123")
     assert !(Hpricot(@basic.to_html)/"p:gt(0)")[0].attributes["class"].split(" ").include?("testing123")
   end
-  
+
+  def test_append_to_element_with_content
+    document = Hpricot.parse("<html><head></meta></head><body><p>Hi!@!!</p><div id='location_9'></div></body></html>")
+    document.search('body').append('<div id="append"></div>')
+    assert_equal '<html><head></head><body><p>Hi!@!!</p><div id="location_9"></div><div id="append"></div></body></html>', document.html
+  end
+
+  def test_append_to_empty_element
+    document = Hpricot.parse("<html><head></meta></head><body></body></html>")
+    document.search('body').append('<div id="append"></div>')
+    assert_equal '<html><head></head><body><div id="append"></div></body></html>', document.html
+  end
+
+  def test_prepend_to_element_with_content
+    document = Hpricot.parse("<html><head></meta></head><body><p>Hi!@!!</p><div id='location_9'></div></body></html>")
+    document.search('body').prepend('<div id="prepend"></div>')
+    assert_equal '<html><head></head><body><div id="prepend"></div><p>Hi!@!!</p><div id="location_9"></div></body></html>', document.html
+  end
+
+  def test_prepend_to_empty_element
+    document = Hpricot.parse("<html><head></meta></head><body></body></html>")
+    document.search('body').prepend('<div id="prepend"></div>')
+    assert_equal '<html><head></head><body><div id="prepend"></div></body></html>', document.html
+  end
+
   def test_change_attributes
     all_ps = (@basic/"p").attr("title", "Some Title & Etc…")
     all_as = (@basic/"a").attr("href", "http://my_new_href.com")
@@ -43,7 +67,7 @@ class TestAlter < Test::Unit::TestCase
     assert_changed(@basic, "a", all_as) {|a| a.attributes["href"] == "http://my_new_href.com"}
     assert_changed(@basic, "link", all_lb) {|a| a.attributes["href"] == "link" }
   end
-  
+
   def test_change_attributes2
     all_as = (@basic%"a").attributes["href"] = "http://my_new_href.com"
     all_ps = (@basic%"p").attributes["title"] = "Some Title & Etc…"
@@ -51,7 +75,7 @@ class TestAlter < Test::Unit::TestCase
     assert_equal (@basic%"p").raw_attributes["title"], "Some Title &amp; Etc&#8230;"
     assert_equal (@basic%"p").attributes["title"], "Some Title & Etc…"
   end
-  
+
   def test_remove_attr
     all_rl = (@basic/"link").remove_attr("href")
     assert_changed(@basic, "link", all_rl) { |link| link['href'].nil? }
