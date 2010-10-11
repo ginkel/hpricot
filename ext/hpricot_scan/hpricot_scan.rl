@@ -12,7 +12,10 @@
 struct hpricot_struct {
   int len;
   VALUE* ptr;
+  int magic;
 };
+
+#define HPRICOT_MAGIC 0x42234223L
 
 #ifndef RARRAY_LEN
 #define RARRAY_LEN(arr)  RARRAY(arr)->len
@@ -140,7 +143,7 @@ static VALUE reProcInsParse;
   }
 
   action save_attr {
-    if (!S->xml)
+    if (!S->xml && !NIL_P(akey))
       akey = rb_funcall(akey, s_downcase, 0);
     ATTR(akey, aval);
   }
@@ -617,16 +620,33 @@ void hstruct_mark(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
   int i;
 
-  for(i = 0; i < st->len; i++) {
-    rb_gc_mark(st->ptr[i]);
+  if (st->magic == HPRICOT_MAGIC) {
+    if (st->ptr == 0) {
+      rb_raise(rb_eFatal, "st->ptr == 0 in hstruct_mark");
+    } else {
+      for(i = 0; i < st->len; i++) {
+        if (st->ptr[i] == 0) {
+          rb_raise(rb_eFatal, "st->ptr[i] == 0 in hstruct_mark");
+        } else {
+          rb_gc_mark(st->ptr[i]);
+        }
+      }
+    }
+  } else {
+    rb_raise(rb_eFatal, "memory corruption in hstruct_mark");
   }
 }
 
 void hstruct_free(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
 
-  free(st->ptr);
-  free(st);
+  if (st->magic == HPRICOT_MAGIC) {
+    st->magic = 0;
+    free(st->ptr);
+    free(st);
+  } else {
+    rb_raise(rb_eFatal, "memory corruption in hstruct_free");
+  }
 }
 
 static VALUE
@@ -637,6 +657,7 @@ alloc_hpricot_struct8(VALUE klass)
 
   obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
 
+  st->magic = HPRICOT_MAGIC;
   st->len = 8;
   st->ptr = ALLOC_N(VALUE, 8);
 
@@ -653,6 +674,8 @@ alloc_hpricot_struct2(VALUE klass)
 
   obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
 
+
+  st->magic = HPRICOT_MAGIC;
   st->len = 2;
   st->ptr = ALLOC_N(VALUE, 2);
 
@@ -669,6 +692,7 @@ alloc_hpricot_struct3(VALUE klass)
 
   obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
 
+  st->magic = HPRICOT_MAGIC;
   st->len = 3;
   st->ptr = ALLOC_N(VALUE, 3);
 

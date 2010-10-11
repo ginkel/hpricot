@@ -377,7 +377,7 @@ module Hpricot
     end
 
     filter '' do |name,i|
-      name == '*' || (self.respond_to?(:name) && self.name.downcase == name.downcase)
+      name == '*' || (self.respond_to?(:name) && !self.name.nil? && self.name.downcase == name.downcase)
     end
 
     filter '#' do |id,i|
