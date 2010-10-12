@@ -622,18 +622,18 @@ void hstruct_mark(void* ptr) {
 
   if (st->magic == HPRICOT_MAGIC) {
     if (st->ptr == 0) {
-      rb_raise(rb_eFatal, "st->ptr == 0 in hstruct_mark");
+      rb_bug("st->ptr == 0 in hstruct_mark");
     } else {
       for(i = 0; i < st->len; i++) {
         if (st->ptr[i] == 0) {
-          rb_raise(rb_eFatal, "st->ptr[i] == 0 in hstruct_mark");
+          rb_bug("st->ptr[%d] == 0 in hstruct_mark", i);
         } else {
           rb_gc_mark(st->ptr[i]);
         }
       }
     }
   } else {
-    rb_raise(rb_eFatal, "memory corruption in hstruct_mark");
+    rb_bug("memory corruption in hstruct_mark");
   }
 }
 
@@ -645,7 +645,7 @@ void hstruct_free(void* ptr) {
     free(st->ptr);
     free(st);
   } else {
-    rb_raise(rb_eFatal, "memory corruption in hstruct_free");
+    rb_bug("memory corruption in hstruct_free");
   }
 }
 
