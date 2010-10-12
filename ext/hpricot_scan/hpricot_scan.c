@@ -6795,58 +6795,39 @@ void hstruct_free(void* ptr) {
 }
 
 static VALUE
+alloc_hpricot_struct(VALUE klass, int size)
+{
+  VALUE obj;
+  struct hpricot_struct* st;
+
+  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
+
+  st->magic = HPRICOT_MAGIC;
+  st->len = size;
+  st->ptr = ALLOC_N(VALUE, st->len);
+  st->magic2 = HPRICOT_MAGIC;
+
+  rb_mem_clear(st->ptr, st->len);
+
+  return obj;
+}
+
+static inline VALUE
 alloc_hpricot_struct8(VALUE klass)
 {
-  VALUE obj;
-  struct hpricot_struct* st;
-
-  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
-
-  st->magic = HPRICOT_MAGIC;
-  st->len = 8;
-  st->ptr = ALLOC_N(VALUE, 8);
-  st->magic2 = HPRICOT_MAGIC;
-
-  rb_mem_clear(st->ptr, 8);
-
-  return obj;
+  return alloc_hpricot_struct(klass, 8);
 }
 
-static VALUE
-alloc_hpricot_struct2(VALUE klass)
-{
-  VALUE obj;
-  struct hpricot_struct* st;
-
-  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
-
-
-  st->magic = HPRICOT_MAGIC;
-  st->len = 2;
-  st->ptr = ALLOC_N(VALUE, 2);
-  st->magic2 = HPRICOT_MAGIC;
-
-  rb_mem_clear(st->ptr, 2);
-
-  return obj;
-}
-
-static VALUE
+static inline VALUE
 alloc_hpricot_struct3(VALUE klass)
 {
-  VALUE obj;
-  struct hpricot_struct* st;
+  return alloc_hpricot_struct(klass, 3);
+}
 
-  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
-
-  st->magic = HPRICOT_MAGIC;
-  st->len = 3;
-  st->ptr = ALLOC_N(VALUE, 3);
-  st->magic2 = HPRICOT_MAGIC;
-
-  rb_mem_clear(st->ptr, 3);
-
-  return obj;
+static inline VALUE
+alloc_hpricot_struct2(VALUE klass)
+{
+  return alloc_hpricot_struct(klass, 2);
 }
 
 static VALUE hpricot_struct_ref0(VALUE obj) {return H_ELE_GET(obj, 0);}
