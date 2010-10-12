@@ -10,9 +10,10 @@
 #include <assert.h>
 
 struct hpricot_struct {
+  int magic;
   int len;
   VALUE* ptr;
-  int magic;
+  int magic2;
 };
 
 #define HPRICOT_MAGIC 0x42234223L
@@ -620,7 +621,7 @@ void hstruct_mark(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
   int i;
 
-  if (st->magic == HPRICOT_MAGIC) {
+  if (st->magic == HPRICOT_MAGIC && st->magic2 == HPRICOT_MAGIC) {
     if (st->ptr == 0) {
       rb_bug("st->ptr == 0 in hstruct_mark");
     } else {
@@ -633,19 +634,20 @@ void hstruct_mark(void* ptr) {
       }
     }
   } else {
-    rb_bug("memory corruption in hstruct_mark");
+    rb_bug("memory corruption in hstruct_mark; magic = %X. magic2 = %X", st->magic, st->magic2);
   }
 }
 
 void hstruct_free(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
 
-  if (st->magic == HPRICOT_MAGIC) {
+  if (st->magic == HPRICOT_MAGIC && st->magic2 == HPRICOT_MAGIC) {
     st->magic = 0;
+    st->magic2 = 0;
     free(st->ptr);
     free(st);
   } else {
-    rb_bug("memory corruption in hstruct_free");
+    rb_bug("memory corruption in hstruct_free; magic = %X. magic2 = %X", st->magic, st->magic2);
   }
 }
 
@@ -660,6 +662,7 @@ alloc_hpricot_struct8(VALUE klass)
   st->magic = HPRICOT_MAGIC;
   st->len = 8;
   st->ptr = ALLOC_N(VALUE, 8);
+  st->magic2 = HPRICOT_MAGIC;
 
   rb_mem_clear(st->ptr, 8);
 
@@ -678,6 +681,7 @@ alloc_hpricot_struct2(VALUE klass)
   st->magic = HPRICOT_MAGIC;
   st->len = 2;
   st->ptr = ALLOC_N(VALUE, 2);
+  st->magic2 = HPRICOT_MAGIC;
 
   rb_mem_clear(st->ptr, 2);
 
@@ -695,6 +699,7 @@ alloc_hpricot_struct3(VALUE klass)
   st->magic = HPRICOT_MAGIC;
   st->len = 3;
   st->ptr = ALLOC_N(VALUE, 3);
+  st->magic2 = HPRICOT_MAGIC;
 
   rb_mem_clear(st->ptr, 3);
 
